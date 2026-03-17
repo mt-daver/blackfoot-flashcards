@@ -22,5 +22,11 @@
     "blackfeet": "Mamia'tsikimi",
     "english": "Magpie",
     "audioUrl": "https://raw.githubusercontent.com/mt-daver/blackfoot-flashcards/main/sounds/birds_magpie.mp3"
+  },
+  {
+    "id": 5,
+    "blackfeet": "Omahkai'stoo",
+    "english": "Ravene",
+    "audioUrl": "https://raw.githubusercontent.com/mt-daver/blackfoot-flashcards/main/sounds/birds_raven.mp3"
   }
 ]
