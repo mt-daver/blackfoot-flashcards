@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blackfoot Flashcards</title>
+    <title>Blackfooot Flashcards</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -32,7 +32,7 @@
     <!-- Header -->
     <div class="mb-8 text-center space-y-2">
         <h1 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">
-            Blackfooot Language Cards
+            Blackfoot Language Cards
         </h1>
         <p class="text-slate-500 font-medium" id="card-counter">
             Loading cards from GitHub...
@@ -275,31 +275,40 @@
         // URL Sanitizer to ensure we are always hitting raw endpoints
         function sanitizeGithubUrl(url) {
             if (!url) return url;
-            // Handle standard github.com/blob links
             if (url.includes('github.com') && url.includes('/blob/')) {
                 return url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
             }
             return url;
         }
 
+        // Fisher-Yates Shuffle Algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
         // Initialization
         async function init() {
             try {
-                // Always try to sanitize the provided constant just in case
                 const targetUrl = sanitizeGithubUrl(GITHUB_JSON_URL);
-                
                 const response = await fetch(targetUrl);
                 
                 if (!response.ok) {
                     throw new Error("Could not load the JSON file.");
                 }
 
-                flashcardsData = await response.json();
+                let data = await response.json();
 
-                if (flashcardsData.length === 0) {
+                if (data.length === 0) {
                     document.getElementById('card-counter').innerHTML = `<span class="text-red-500 font-bold">No cards found in JSON.</span>`;
                     return;
                 }
+
+                // Randomize the cards immediately after loading
+                flashcardsData = shuffleArray(data);
 
                 syncAudioElements();
                 createDots();
@@ -307,15 +316,14 @@
 
             } catch (err) {
                 console.error("Initialization error:", err);
-                
-                // Fallback: If it can't find your link above, it will safely load the 3 defaults so the app doesn't break
                 document.getElementById('card-counter').innerHTML = `<span class="text-red-500">Failed to load JSON link. Loading defaults.</span>`;
                 
-                flashcardsData = [
+                const defaults = [
                     { id: 1, blackfeet: "Aahkitsimio'p niita'paisiksikimiyi", english: "Let's drink coffee.", audioUrl: "https://raw.githubusercontent.com/mt-daver/blackfeet-flashcards/0377b1ff4dc6586befc3ee1f2a93fbec708c5b91/eating_lets-drink-coffee.mp3" },
                     { id: 2, blackfeet: "Aahsikskanaotonni", english: "Pleasant morning.", audioUrl: "https://raw.githubusercontent.com/mt-daver/blackfeet-flashcards/0377b1ff4dc6586befc3ee1f2a93fbec708c5b91/greetings_pleasant-morning.mp3" },
                     { id: 3, blackfeet: "Áíkia'piiwa", english: "What's happening?", audioUrl: "https://raw.githubusercontent.com/mt-daver/blackfeet-flashcards/0377b1ff4dc6586befc3ee1f2a93fbec708c5b91/aikiapiiwa.mp3" }
                 ];
+                flashcardsData = shuffleArray(defaults);
                 
                 syncAudioElements();
                 createDots();
@@ -492,7 +500,6 @@
 
             audioUrlText = sanitizeGithubUrl(audioUrlText);
 
-            // Give it a temporary unique ID
             const newId = flashcardsData.length > 0 ? Math.max(...flashcardsData.map(c => c.id || 0)) + 1 : 1;
 
             const newCard = {
@@ -502,12 +509,10 @@
                 audioUrl: audioUrlText || null
             };
 
-            // Push to local memory array
             flashcardsData.push(newCard);
             
             closeModal();
 
-            // Move to the newly added card
             if (isFlipped) toggleFlip();
             setTimeout(() => {
                 currentIndex = flashcardsData.length - 1;
